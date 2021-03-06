@@ -1,6 +1,6 @@
 #
 #
-# selectRetrieve5
+# selectRetrieve5_1
 # Git
 # /Developmnt/metis_dev2/selectRetrieve5
 # - resegment_observe branch
@@ -28,15 +28,16 @@ shinyServer(function(input, output) {
   # Normal Functions
 
     rssSelection <- function(rssSelected,  Source, Orientation, Country, Topic){
-      ifelse(is.null(Source), rssSelected <- rssSelected,
-             rssSelected <- filter(rssSelected, Source == ext_name))
+
         ifelse(is.null(Orientation), rssSelected <- rssSelected,
-               rssSelected <- filter(rssSelected, orientation %in% Orientation))
+               rssSelected <- filter(rssSelected, Orientation == orientation))
         ifelse(is.null(Country), rssSelected <- rssSelected,
                rssSelected <- filter(rssSelected, Country  == country))
         ifelse(is.null(Topic), rssSelected <- rssSelected,
-               rssSelected)
+               rssSelected<- dplyr::filter(rssSelected, str_detect(rssSelected[,"item_title"], regex(Topic, ignore_case = TRUE))))
+        return(rssSelected)
     }
+
 
     posneg <- function(SA_scores){
         neg <- -sum(SA_scores[SA_scores <0])
@@ -86,22 +87,107 @@ shinyServer(function(input, output) {
     })
 
 
+    sumVals2 <-  reactive({
+      query_in <- rssSelection(query_out_Date(), input$isource2, input$iorientation2, input$icountry2, input$iTextinput2)
+      sumVals <- query_in %>%
+        group_by(item_date_published) %>%
+        summarize(
+          syuzhet = sum(syuzhet_score),
+          afinn = sum(afinn_score),
+          bing = sum(bing_score),
+          nrc_anger = sum(nrc_score_anger),
+          nrc_anticipation = sum(nrc_score_anticipation),
+          nrc_disgust = sum(nrc_score_disgust),
+          nrc_fear = sum(nrc_score_fear),
+          nrc_joy = sum(nrc_score_joy),
+          nrc_positive =sum(nrc_score_positive),
+          nrc_negative = sum(nrc_score_negative),
+          nrc_sadness = sum(nrc_score_sadness),
+          nrc_surprise = sum(nrc_score_surprise),
+          nrc_trust = sum(nrc_score_trust),
+          loughran_constraining = sum(loughran_frame_constraining),
+          loughran_litigious = sum(loughran_frame_litigious),
+          loughran_negative = sum(loughran_frame_negative),
+          loughran_positive = sum(loughran_frame_positive),
+          loughran_uncertain = sum(loughran_frame_uncertain),
+          ensemble_posneg = sum(ensemble_posneg)
+        )
+      sumVals <- filter(sumVals, item_date_published >= input$dateRange[1]) # Remove items before selection date
+      sumVals <-sumVals %>% gather('syuzhet', 'afinn', 'bing', 'nrc_anger', 'nrc_anticipation', 'nrc_disgust', 'nrc_fear', 'nrc_joy',
+                                   'nrc_positive', 'nrc_negative', 'nrc_sadness', 'nrc_surprise', 'nrc_trust', 'loughran_constraining',
+                                   'loughran_litigious', 'loughran_negative', 'loughran_positive', 'loughran_uncertain','ensemble_posneg', key = "factorName", value = 'factorValue')
+      sumVals$factorName <- as.factor(sumVals$factorName)
+      sumVals
+    })
+
+
 #totVals - sums values for total period for each SA factor
     totVals <- reactive({
       query_in <- rssSelection(query_out_Date(), input$isource, input$iorientation, input$icountry, input$iTextinput)
       totVals <- query_in %>% gather(syuzhet_score, afinn_score, bing_score,
-                                                              nrc_score_anger, nrc_score_anticipation, nrc_score_disgust, nrc_score_fear,
-                                                              nrc_score_joy, nrc_score_positive, nrc_score_negative,
-                                                              nrc_score_sadness, nrc_score_surprise, nrc_score_trust,
-                                                              loughran_frame_constraining, loughran_frame_litigious,
-                                                              loughran_frame_negative, loughran_frame_positive, loughran_frame_uncertain, nrc_comp, loughran_comp, ensemble_posneg, key = "factorName", value = 'factorValue')
+                                    nrc_score_anger, nrc_score_anticipation, nrc_score_disgust, nrc_score_fear,
+                                    nrc_score_joy, nrc_score_positive, nrc_score_negative,
+                                    nrc_score_sadness, nrc_score_surprise, nrc_score_trust,
+                                    loughran_frame_constraining, loughran_frame_litigious,
+                                    loughran_frame_negative, loughran_frame_positive, loughran_frame_uncertain,
+                                    nrc_comp, loughran_comp, ensemble_posneg, key = "factorName", value = 'factorValue')
 
     totVals$factorName <- as.factor(totVals$factorName)
     totValsSums <- tapply(totVals$factorValue, totVals$factorName, FUN = sum, na.rm = TRUE)
     totValsSums1 <- melt(totValsSums)
     print("totVals Here")
+
     colnames(totValsSums1) <- c("Factor", "Value")
+
+    totValsSums1 <- rbind(totValsSums1,
+                          data.frame(Factor = "PosNeg", Value = 0),
+                          data.frame(Factor = "nrc", Value = 0),
+                          data.frame(Factor = "loughran", Value = 0))
+     totValsSumsGp <- c(1,1,1,2,
+                        2,2,1,1,
+                        2,3,3,3,
+                        3,3,3,1,
+                        1,3,3,3,
+                        1,0,0,0)
+
+     totValsSums1$group1 <- as.factor(totValsSumsGp)
+    totValsSums1[totValsSums1$loughran_frame_negative, 2] <-  99 #totValsSums1[totValsSums1$loughran_frame_negative, 2] * -1
+     print("here")
     totValsSums1
+    })
+
+    totVals2 <- reactive({
+      query_in <- rssSelection(query_out_Date(), input$isource2, input$iorientation2, input$icountry2, input$iTextinput2)
+      totVals <- query_in %>% gather(syuzhet_score, afinn_score, bing_score,
+                                     nrc_score_anger, nrc_score_anticipation, nrc_score_disgust, nrc_score_fear,
+                                     nrc_score_joy, nrc_score_positive, nrc_score_negative,
+                                     nrc_score_sadness, nrc_score_surprise, nrc_score_trust,
+                                     loughran_frame_constraining, loughran_frame_litigious,
+                                     loughran_frame_negative, loughran_frame_positive, loughran_frame_uncertain,
+                                     nrc_comp, loughran_comp, ensemble_posneg, key = "factorName", value = 'factorValue')
+
+      totVals$factorName <- as.factor(totVals$factorName)
+      totValsSums <- tapply(totVals$factorValue, totVals$factorName, FUN = sum, na.rm = TRUE)
+      totValsSums1 <- melt(totValsSums)
+      print("totVals Here")
+
+      colnames(totValsSums1) <- c("Factor", "Value")
+
+      totValsSums1 <- rbind(totValsSums1,
+                            data.frame(Factor = "PosNeg", Value = 0),
+                            data.frame(Factor = "nrc", Value = 0),
+                            data.frame(Factor = "loughran", Value = 0))
+      totValsSumsGp <- c(1,1,1,2,
+                         2,2,1,1,
+                         2,3,3,3,
+                         3,3,3,1,
+                         1,3,3,3,
+                         1,0,0,0)
+
+      totValsSums1$group1 <- as.factor(totValsSumsGp)
+      totValsSums1[totValsSums1$loughran_frame_negative, 2] <-  99 #totValsSums1[totValsSums1$loughran_frame_negative, 2] * -1
+      print("here")
+      totValsSums1
     })
 
 
@@ -191,7 +277,9 @@ shinyServer(function(input, output) {
     })   # Retrieves records between dates. This is the only database retrieval. Other selections are done from this
 
     query_out_Date_proc <- query_out_Date
-    query_out_List <- reactive({rssSelection(query_out_Date, input$isource, input$iorientation, input$icountry, input$iTextinput)
+    print("Here!")
+    query_out_List <- reactive({rssSelection(query_out_Date, input$isource, input$orientation, input$icountry, input$iTextinput)
+      print("herre")
       }) # Filter on input$
 
     ##############
@@ -203,23 +291,65 @@ shinyServer(function(input, output) {
       sumVals1 <- filter(sumVals(), factorName %in% input$iSentimentFactor )
       p <- ggplot(sumVals1, aes(x = item_date_published, y = rollmean(factorValue, input$dateGrouping, na.pad = TRUE), colour = factorName)) +
         geom_line() +
+        geom_smooth(method = input$ismooth) +
         xlab("Story date") + ylab("Factor score") +
-        ggtitle("Time series analysis / Moving average") +
+        ggtitle("Time series analysis / Moving average 1") +
         labs(colour = "Methods")
 
       p
     })
 
+    output$SA_by_date_line2 <- renderPlot({
+      sumVals2 <- filter(sumVals2(), factorName %in% input$iSentimentFactor )
+      p <- ggplot(sumVals2, aes(x = item_date_published, y = rollmean(factorValue, input$dateGrouping, na.pad = TRUE), colour = factorName)) +
+        geom_line() +
+        geom_smooth(method = input$ismooth) +
+        xlab("Story date") + ylab("Factor score") +
+        ggtitle("Time series analysis / Moving average 2") +
+        labs(colour = "Methods")
+
+      p
+    })
+#########################
     output$SA_summary_by_period <-renderPlot({
       print("SA_s_b_P")
-#      totVals1 <- filter(totVals(), factorName %in% input$iSentimentFactor )
-      q <- ggplot(totVals(), aes(x = reorder(Factor, Value), y = Value))+
+      x_tick_titles <- ("this")
+      q <- ggplot(totVals(), aes(x = Factor, y = Value, fill = group1))+
         theme(axis.text.x = element_text(angle = 90))+
         ggtitle("Period analysis / Sentiment") +
-        geom_bar(stat = "identity")
+        scale_x_discrete(limits = c('PosNeg', 'ensemble_posneg', 'afinn_score', 'bing_score', 'syuzhet_score', 'loughran_frame_positive', 'loughran_frame_negative',
+                                    'nrc_score_positive', 'nrc_score_negative','nrc',
+                                    'nrc_score_anger', 'nrc_score_anticipation', 'nrc_score_disgust', 'nrc_score_fear',
+                                    'nrc_score_joy',
+                                    'nrc_score_sadness', 'nrc_score_surprise', 'nrc_score_trust', 'loughran',
+                                    'loughran_frame_constraining', 'loughran_frame_litigious', 'loughran_frame_uncertain'
+                                    )) +
+        geom_bar(stat = "identity", colour = "black") +
+        theme(legend.position = "none")
 
       q
     })
+
+
+    output$SA_summary_by_period2 <-renderPlot({
+      print("SA_s_b_P")
+      x_tick_titles <- ("this")
+      q <- ggplot(totVals2(), aes(x = Factor, y = Value, fill = group1))+
+        theme(axis.text.x = element_text(angle = 90))+
+        ggtitle("Period analysis / Sentiment 2") +
+        scale_x_discrete(limits = c('PosNeg', 'ensemble_posneg', 'afinn_score', 'bing_score', 'syuzhet_score', 'loughran_frame_positive', 'loughran_frame_negative',
+                                    'nrc_score_positive', 'nrc_score_negative','nrc',
+                                    'nrc_score_anger', 'nrc_score_anticipation', 'nrc_score_disgust', 'nrc_score_fear',
+                                    'nrc_score_joy',
+                                    'nrc_score_sadness', 'nrc_score_surprise', 'nrc_score_trust', 'loughran',
+                                    'loughran_frame_constraining', 'loughran_frame_litigious', 'loughran_frame_uncertain'
+        )) +
+        geom_bar(stat = "identity", colour = "black") +
+        theme(legend.position = "none")
+      q
+    })
+
+    ##########################
     output$tbl <- DT::renderDT(rssSelection(query_out_Date(), input$isource, input$orientation, input$icountry, input$iTextinput))
 
 })
