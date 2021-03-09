@@ -1,6 +1,6 @@
 #
 #
-# selectRetrieve5_1
+# selectRetrieve6
 # Git
 # /Developmnt/metis_dev2/selectRetrieve5
 # - resegment_observe branch
@@ -289,11 +289,12 @@ shinyServer(function(input, output) {
     ##############
     output$SA_by_date_line <- renderPlot({
       sumVals1 <- filter(sumVals(), factorName %in% input$iSentimentFactor )
+      gtitle <- paste("Time series analysis / Moving average 1 ", input$ismooth)
       p <- ggplot(sumVals1, aes(x = item_date_published, y = rollmean(factorValue, input$dateGrouping, na.pad = TRUE), colour = factorName)) +
         geom_line() +
         geom_smooth(method = input$ismooth) +
         xlab("Story date") + ylab("Factor score") +
-        ggtitle("Time series analysis / Moving average 1") +
+        ggtitle(gtitle ) +
         labs(colour = "Methods")
 
       p
@@ -301,13 +302,13 @@ shinyServer(function(input, output) {
 
     output$SA_by_date_line2 <- renderPlot({
       sumVals2 <- filter(sumVals2(), factorName %in% input$iSentimentFactor )
+      gtitle <- paste("Time series analysis / Moving average 2 ", input$ismooth)
       p <- ggplot(sumVals2, aes(x = item_date_published, y = rollmean(factorValue, input$dateGrouping, na.pad = TRUE), colour = factorName)) +
         geom_line() +
         geom_smooth(method = input$ismooth) +
         xlab("Story date") + ylab("Factor score") +
-        ggtitle("Time series analysis / Moving average 2") +
+        ggtitle(gtitle) +
         labs(colour = "Methods")
-
       p
     })
 #########################

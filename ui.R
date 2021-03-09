@@ -1,6 +1,6 @@
 #
 #
-# selectRetrieve5_1
+# selectRetrieve6
 # Git
 # /Developmnt/metis_dev2/selectRetrieve5
 # - resegment_observe branch
@@ -119,24 +119,23 @@ textInput("iTextinput2",
 
         # Show a plot of the generated distribution
         mainPanel(fluidRow(
-            column(4,
-            dropdown(
-              tooltip= TRUE,
-              label = "Normalize",
-              tags$h3("Normalize"),
-            fluidRow(
-                column(4, radioButtons("iPosNegNorm", "Normalise pos/neg", choices = c("On", "Off"), inline = TRUE)),
-                column(4,radioButtons("iLRCNorm", "Normalise LRC", choices = c("On", "Off"), inline = TRUE)),
-                column(4,radioButtons("iCountryNorm", "Normalise Countries", choices = c("On", "Off"), inline = TRUE)),
 
-            ))),
+            column(4,
             dropdown(
               tootip = TRUE,
               label = "Smoothing",
               tags$h3("Smoothing"),
               radioButtons("ismooth", "Method",
-                           c("loess" = "loess", "lm" = "lm", "None"= ""))
-            )),
+                           c("loess" = "loess", "lm" = "lm","gam" = "gam", "None"= ""))
+            ),
+            dropdown(
+                tooltip = TRUE,
+                label = "Normalize",
+                fluidRow(
+                radioButtons("iPosNegNorm", "Normalise pos/neg", choices = c("On", "Off"), inline = TRUE),
+                radioButtons("iLRCNorm", "Normalise LRC", choices = c("On", "Off"), inline = TRUE),
+                radioButtons("iCountryNorm", "Normalise Countries", choices = c("On", "Off"), inline = TRUE))
+            ))),
             plotOutput("SA_by_date_line"),
             plotOutput("SA_summary_by_period"),
             plotOutput("SA_by_date_line2"),
