@@ -127,7 +127,8 @@ textInput("iTextinput2",
               tags$h3("Smoothing"),
               radioButtons("ismooth", "Method",
                            c("loess" = "loess", "lm" = "lm","gam" = "gam", "None"= ""))
-            ),
+            )),
+            column(8,
             dropdown(
                 tooltip = TRUE,
                 label = "Normalize",
