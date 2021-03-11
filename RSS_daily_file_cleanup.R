@@ -119,9 +119,10 @@ for(i in 1: nrow(rssSources)){
       inner_join(get_sentiments(method), by = "word")
     loughran_dataY <- rbind(loughran_dataY, loughran_dataX)
   }
-  loughran_consol <- select(loughran_dataY,index, sentiment)
-
-
+print("Problem location")
+print(loughran_dataY$index)
+print(loughran_dataY$sentiment)
+  loughran_consol <- dplyr::select(loughran_dataY, index, sentiment)
   loughran_frame <- data.frame(index = 1:nrow(intermediate),
                                negative = 0,
                                positive = 0,
