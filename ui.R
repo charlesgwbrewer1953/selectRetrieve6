@@ -23,6 +23,7 @@ library(shinysky)
 library(reshape2)
 library(shinythemes)
 library(shinyWidgets)
+library(MASS)
 
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
@@ -126,7 +127,7 @@ textInput("iTextinput2",
               label = "Smoothing",
               tags$h3("Smoothing"),
               radioButtons("ismooth", "Method",
-                           c("loess" = "loess", "lm" = "lm","gam" = "gam", "None"= ""))
+                           c("loess" = "loess", "lm" = "lm","gam" = "gam", "glm" = "glm", "MASS:rlm" = "MASS:rlm", "None"= ""))
             )),
             column(8,
             dropdown(
