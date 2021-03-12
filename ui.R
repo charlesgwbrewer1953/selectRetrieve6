@@ -150,8 +150,8 @@ shinyUI(fluidPage(
                                  value = " ")
                    )
                  ),
-            column(width = 2, offset = 1,
-                   dropdown(
+                column(width = 2, offset = 1,
+                       dropdown(
                        tooltip = TRUE,
                        label = "Selections2",
                        tags$h3("Selections 2"),
@@ -197,6 +197,7 @@ shinyUI(fluidPage(
                 radioButtons("iLRCNorm", "Normalise LRC", choices = c("On", "Off"), inline = TRUE),
                 radioButtons("iCountryNorm", "Normalise Countries", choices = c("On", "Off"), inline = TRUE))
             ))),
+            # DT::dataTableOutput("Selections"),
             plotOutput("SA_by_date_line"),
             plotOutput("SA_summary_by_period"),
             plotOutput("SA_by_date_line2"),

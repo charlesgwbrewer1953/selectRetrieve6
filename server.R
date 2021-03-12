@@ -14,7 +14,7 @@
 #
 
 # Define server logic required to draw a histogram
-shinyServer(function(input, output) {
+shinyServer(function(input, output, session) {
 
   # Connections
 
@@ -290,8 +290,25 @@ shinyServer(function(input, output) {
     #
     ##############
 
+    output$Selections <- DT::renderDT({
+      # v1 <- c(input$isource, input$icountry, input$iorientation, input$iTextinput )
+      # v2 <- c(input$isource2, input$icountry2, input$iorientation2, input$iTextinput2 )
+      # dataSelection <- rbind(v1, v2)
+      query_out_List
+      })
+
 
     output$SA_by_date_line <- renderPlot({
+      # progress <- Progress$new(session, min=1, max=15)
+      # on.exit(progress$close())
+      #
+      # progress$set(message = 'Story retrieval in progress',
+      #              detail = 'This may take a while...')
+      #
+      # for (i in 1:5000*(input$dateRange[2]-input$dateRange[1])) {
+      #   progress$set(value = i)
+      #   Sys.sleep(0.5)
+      # }
       sumVals1 <- filter(sumVals(), factorName %in% input$iSentimentFactor )
       gtitle <- paste("Time series analysis / Moving average 1 ", input$ismooth)
       p <- ggplot(sumVals1, aes(x = item_date_published, y = rollmean(factorValue, input$dateGrouping, na.pad = TRUE), colour = factorName)) +
