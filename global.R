@@ -17,6 +17,19 @@ library(shiny)
 library(tidyverse)
 library(RMariaDB)
 
+## Normalise for factor which has positive and negative values in single variable
+sa_method_norm1 <- function(score_name){
+  score_pos <- sum(score_name[score_name >0], na.rm = TRUE)
+  score_neg <- sum(score_name[score_name <0], na.rm = TRUE)
+  score_adjust <- score_neg/score_pos
+}
+
+## Normalise for factor which has positive and negative values in separate variables
+sa_method_norm2 <- function(score_name1, score_name2){
+  score_pos <- sum(score_name1[score_name1 >0], na.rm = TRUE)
+  score_neg <- -1* sum(score_name2[score_name2 <0], na.rm = TRUE)
+  score_adjust <- score_neg/score_pos
+}
 
 
 print("About to connect - Gobal/Remote")
@@ -31,31 +44,11 @@ dbListTables(conR)
 dbQuery <- dbSendQuery(conR, "SELECT * FROM rssSources")
 rssSources <- dbFetch(dbQuery)
 print("RSS Feeds static data retrieved")
-rssSources.names <- unique(select(rssSources,Feed))
+rssSources.names <- unique(dplyr::select(rssSources,Feed))
 rssSources.names <- sort(rssSources.names[,1])
-rss.Countries <- unique(select(rssSources,Country))
+rss.Countries <- unique(dplyr::select(rssSources,Country))
 rss.Countries <- sort(rss.Countries[,1])
-rss.Orientation <- unique(select(rssSources,Orientation))
+rss.Orientation <- unique(dplyr::select(rssSources,Orientation))
 rss.Orientation <- sort(rss.Orientation[,1])
-rss.Lookups <- unique(select(rssSources,URL, Orientation))
+rss.Lookups <- unique(dplyr::select(rssSources,URL, Orientation))
 
-# dbDisconnect(conM)
-# print("Remote disconnected - Global/Remote")
-
-# print("About to connect - Local")
-
-############
-#
-# local user = metis_local
-# local pw = metis_pw
-# locval db = metis_db
-#
-############
-
-#
-#
-# remoteuserpassword <- "metis_pw"
-# conL <- dbConnect(RMariaDB::MariaDB(), dbname = 'metis_db', 'metis_local', password = remoteuserpassword, host = "127.0.0.1", port = 3306)
-# print("Connected local 1")
-# dbListTables(conL)
-# dbDisconnect(conL)

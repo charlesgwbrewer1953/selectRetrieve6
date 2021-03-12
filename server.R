@@ -53,6 +53,7 @@ shinyServer(function(input, output) {
 
 # Reactive functions
 # sumvals - sums values by selected
+
     sumVals <-  reactive({
       query_in <- rssSelection(query_out_Date(), input$isource, input$iorientation, input$icountry, input$iTextinput)
       sumVals <- query_in %>%
@@ -117,6 +118,7 @@ shinyServer(function(input, output) {
                                    'nrc_positive', 'nrc_negative', 'nrc_sadness', 'nrc_surprise', 'nrc_trust', 'loughran_constraining',
                                    'loughran_litigious', 'loughran_negative', 'loughran_positive', 'loughran_uncertain','ensemble_posneg', key = "factorName", value = 'factorValue')
       sumVals$factorName <- as.factor(sumVals$factorName)
+      browser()
       sumVals
     })
 
@@ -287,6 +289,8 @@ shinyServer(function(input, output) {
     #   Output section
     #
     ##############
+
+
     output$SA_by_date_line <- renderPlot({
       sumVals1 <- filter(sumVals(), factorName %in% input$iSentimentFactor )
       gtitle <- paste("Time series analysis / Moving average 1 ", input$ismooth)

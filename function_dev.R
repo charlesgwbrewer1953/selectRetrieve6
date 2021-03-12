@@ -21,7 +21,7 @@ function_dev$act_date <- as.Date(str_sub(function_dev$item_date_published, 1, 10
 
 #######################
 
-num_cols <- select(function_dev, c(afinn_score, bing_score, syuzhet_score, nrc_score_positive, nrc_score_negative,
+num_cols <- dplyr::select(function_dev, c(afinn_score, bing_score, syuzhet_score, nrc_score_positive, nrc_score_negative,
                                    loughran_frame_positive, loughran_frame_negative ))
 
 afinn_pos <- sum(num_cols$afinn_score[num_cols$afinn_score > 0], na.rm = TRUE)
@@ -42,7 +42,7 @@ syuzhet_posneg_norm <- syuzhet_neg/syuzhet_pos
 nrc_posneg_norm <- nrc_neg/nrc_pos
 loughran_posneg_norm <- loughran_neg/loughran_pos
 posneg_norm <- data.frame(afinn_posneg_norm, bing_posneg_norm, syuzhet_posneg_norm, nrc_posneg_norm, loughran_posneg_norm)
-
+###############################
 
 sa_method_norm1 <- function(score_name){
     score_pos <- sum(score_name[score_name >0], na.rm = TRUE)
@@ -56,9 +56,9 @@ sa_method_norm2 <- function(score_name1, score_name2){
   score_adjust <- score_neg/score_pos
 }
 
+
 afinn_posneg_norm1 <- sa_method_norm1(num_cols$afinn_score)
 bing_posneg_norm1 <- sa_method_norm1(num_cols$bing_score)
 syuzhet_posneg_norm1 <- sa_method_norm1(num_cols$syuzhet_score)
-
 nrc_posneg_norm1 <- sa_method_norm2(num_cols$nrc_score_positive, num_cols$nrc_score_negative)
 loughran_posneg_norm1 <- sa_method_norm2(num_cols$loughran_frame_positive, num_cols$loughran_frame_negative)
