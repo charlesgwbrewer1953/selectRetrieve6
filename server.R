@@ -118,7 +118,7 @@ shinyServer(function(input, output) {
                                    'nrc_positive', 'nrc_negative', 'nrc_sadness', 'nrc_surprise', 'nrc_trust', 'loughran_constraining',
                                    'loughran_litigious', 'loughran_negative', 'loughran_positive', 'loughran_uncertain','ensemble_posneg', key = "factorName", value = 'factorValue')
       sumVals$factorName <- as.factor(sumVals$factorName)
-      browser()
+#      browser()
       sumVals
     })
 
@@ -296,7 +296,7 @@ shinyServer(function(input, output) {
       gtitle <- paste("Time series analysis / Moving average 1 ", input$ismooth)
       p <- ggplot(sumVals1, aes(x = item_date_published, y = rollmean(factorValue, input$dateGrouping, na.pad = TRUE), colour = factorName)) +
         geom_line() +
-        geom_smooth(method = input$ismooth) +
+        geom_smooth(method = input$ismooth, fullrange = TRUE) +
         xlab("Story date") + ylab("Factor score") +
         ggtitle(gtitle ) +
         labs(colour = "Methods")
@@ -309,7 +309,7 @@ shinyServer(function(input, output) {
       gtitle <- paste("Time series analysis / Moving average 2 ", input$ismooth)
       p <- ggplot(sumVals2, aes(x = item_date_published, y = rollmean(factorValue, input$dateGrouping, na.pad = TRUE), colour = factorName)) +
         geom_line() +
-        geom_smooth(method = input$ismooth) +
+        geom_smooth(method = input$ismooth, fullrange = TRUE) +
         xlab("Story date") + ylab("Factor score") +
         ggtitle(gtitle) +
         labs(colour = "Methods")

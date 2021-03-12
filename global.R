@@ -21,6 +21,8 @@ library(RMariaDB)
 sa_method_norm1 <- function(score_name){
   score_pos <- sum(score_name[score_name >0], na.rm = TRUE)
   score_neg <- sum(score_name[score_name <0], na.rm = TRUE)
+  if(score_pos == 0){score_pos <- 1}
+  if(score_neg == 0){score_pos <- 1}
   score_adjust <- score_neg/score_pos
 }
 
@@ -28,6 +30,8 @@ sa_method_norm1 <- function(score_name){
 sa_method_norm2 <- function(score_name1, score_name2){
   score_pos <- sum(score_name1[score_name1 >0], na.rm = TRUE)
   score_neg <- -1* sum(score_name2[score_name2 <0], na.rm = TRUE)
+  if(score_pos == 0){score_pos <- 1}
+  if(score_neg == 0){score_pos <- 1}
   score_adjust <- score_neg/score_pos
 }
 
