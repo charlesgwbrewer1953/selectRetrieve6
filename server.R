@@ -27,12 +27,14 @@ shinyServer(function(input, output, session) {
 
   # Normal Functions
 
-    rssSelection <- function(rssSelected,  Source, Orientation, Country, Topic){
+    rssSelection <- function(rssSelected,  Source, Orientation, Country, Region, Topic){
 
         ifelse(is.null(Orientation), rssSelected <- rssSelected,
                rssSelected <- filter(rssSelected, Orientation == orientation))
         ifelse(is.null(Country), rssSelected <- rssSelected,
                rssSelected <- filter(rssSelected, Country  == country))
+        # ifelse(is.null(Region), rssSelected <- rssSelected,
+        #        rssSelected <- filter(rssSelected, Region  == region))
         ifelse(is.null(Topic), rssSelected <- rssSelected,
                rssSelected<- dplyr::filter(rssSelected, str_detect(rssSelected[,"item_title"], regex(Topic, ignore_case = TRUE))))
         return(rssSelected)
@@ -55,7 +57,7 @@ shinyServer(function(input, output, session) {
 # sumvals - sums values by selected
 
     sumVals <-  reactive({
-      query_in <- rssSelection(query_out_Date(), input$isource, input$iorientation, input$icountry, input$iTextinput)
+      query_in <- rssSelection(query_out_Date(), input$isource, input$iorientation, input$icountry,input$iregion, input$iTextinput)
       sumVals <- query_in %>%
       group_by(item_date_published) %>%
       summarize(
@@ -89,7 +91,7 @@ shinyServer(function(input, output, session) {
 
 
     sumVals2 <-  reactive({
-      query_in <- rssSelection(query_out_Date(), input$isource2, input$iorientation2, input$icountry2, input$iTextinput2)
+      query_in <- rssSelection(query_out_Date(), input$isource2, input$iorientation2, input$icountry2, input$iregion2, input$iTextinput2)
       sumVals <- query_in %>%
         group_by(item_date_published) %>%
         summarize(
@@ -125,7 +127,7 @@ shinyServer(function(input, output, session) {
 
 #totVals - sums values for total period for each SA factor
     totVals <- reactive({
-      query_in <- rssSelection(query_out_Date(), input$isource, input$iorientation, input$icountry, input$iTextinput)
+      query_in <- rssSelection(query_out_Date(), input$isource, input$iorientation, input$icountry, input$iregion, input$iTextinput)
       totVals <- query_in %>% gather(syuzhet_score, afinn_score, bing_score,
                                     nrc_score_anger, nrc_score_anticipation, nrc_score_disgust, nrc_score_fear,
                                     nrc_score_joy, nrc_score_positive, nrc_score_negative,
@@ -159,7 +161,7 @@ shinyServer(function(input, output, session) {
     })
 
     totVals2 <- reactive({
-      query_in <- rssSelection(query_out_Date(), input$isource2, input$iorientation2, input$icountry2, input$iTextinput2)
+      query_in <- rssSelection(query_out_Date(), input$isource2, input$iorientation2, input$icountry2,input$iregion2, input$iTextinput2)
       totVals <- query_in %>% gather(syuzhet_score, afinn_score, bing_score,
                                      nrc_score_anger, nrc_score_anticipation, nrc_score_disgust, nrc_score_fear,
                                      nrc_score_joy, nrc_score_positive, nrc_score_negative,
@@ -206,7 +208,8 @@ shinyServer(function(input, output, session) {
 
         outSeq <- seq(as.Date(input$dateRange[1]) , as.Date(input$dateRange[2]), by = "day")
         outSeq <- format(as.Date(outSeq, "%Y_%m_%d"))
-        query_out_frame <- data.frame(ext_name = character(), item_title = character(), item_date_published = character(), orientation = character(), country = character() ,
+        query_out_frame <- data.frame(ext_name = character(), item_title = character(), item_date_published = character(), orientation = character(),
+                                      country = character() , region = character(),
                                       syuzhet_score = numeric(), afinn_score = numeric(), bing_score  = numeric(),
                                       nrc_score_anger = numeric(), nrc_score_anticipation = numeric(), nrc_score_disgust = numeric(), nrc_score_fear = numeric(),
                                       nrc_score_joy = numeric(), nrc_score_positive = numeric(), nrc_score_negative = numeric(),
@@ -279,9 +282,9 @@ shinyServer(function(input, output, session) {
     })   # Retrieves records between dates. This is the only database retrieval. Other selections are done from this
 
     query_out_Date_proc <- query_out_Date
-    print("Here!")
-    query_out_List <- reactive({rssSelection(query_out_Date, input$isource, input$orientation, input$icountry, input$iTextinput)
-      print("herre")
+    print("Here1")
+    query_out_List <- reactive({rssSelection(query_out_Date, input$isource, input$orientation, input$icountry,input$iregion, input$iTextinput)
+      print("Here2")
       }) # Filter on input$
 
     ##############
@@ -291,9 +294,9 @@ shinyServer(function(input, output, session) {
     ##############
 
     output$Selections <- DT::renderDT({
-      # v1 <- c(input$isource, input$icountry, input$iorientation, input$iTextinput )
-      # v2 <- c(input$isource2, input$icountry2, input$iorientation2, input$iTextinput2 )
-      # dataSelection <- rbind(v1, v2)
+       v1 <- c(input$isource, input$icountry,input$iregion,  input$iorientation, input$iTextinput )
+       v2 <- c(input$isource2, input$icountry2, input$iregion2, input$iorientation2, input$iTextinput2 )
+       dataSelection <- rbind(v1, v2)
       query_out_List
       })
 
@@ -372,6 +375,6 @@ shinyServer(function(input, output, session) {
     })
 
     ##########################
-    output$tbl <- DT::renderDT(rssSelection(query_out_Date(), input$isource, input$orientation, input$icountry, input$iTextinput))
+    output$tbl <- DT::renderDT(rssSelection(query_out_Date(), input$isource, input$orientation, input$icountry, input$iregion, input$iTextinput))
 
 })

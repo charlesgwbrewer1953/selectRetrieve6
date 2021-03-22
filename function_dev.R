@@ -62,3 +62,52 @@ bing_posneg_norm1 <- sa_method_norm1(num_cols$bing_score)
 syuzhet_posneg_norm1 <- sa_method_norm1(num_cols$syuzhet_score)
 nrc_posneg_norm1 <- sa_method_norm2(num_cols$nrc_score_positive, num_cols$nrc_score_negative)
 loughran_posneg_norm1 <- sa_method_norm2(num_cols$loughran_frame_positive, num_cols$loughran_frame_negative)
+
+
+########################
+########################
+
+library(shiny)
+library(tidyverse)
+library(RMariaDB)
+
+## Normalise for factor which has positive and negative values in single variable
+sa_method_norm1 <- function(score_name){
+  score_pos <- sum(score_name[score_name >0], na.rm = TRUE)
+  score_neg <- sum(score_name[score_name <0], na.rm = TRUE)
+  if(score_pos == 0){score_pos <- 1}
+  if(score_neg == 0){score_pos <- 1}
+  score_adjust <- score_neg/score_pos
+}
+
+## Normalise for factor which has positive and negative values in separate variables
+sa_method_norm2 <- function(score_name1, score_name2){
+  score_pos <- sum(score_name1[score_name1 >0], na.rm = TRUE)
+  score_neg <- -1* sum(score_name2[score_name2 <0], na.rm = TRUE)
+  if(score_pos == 0){score_pos <- 1}
+  if(score_neg == 0){score_pos <- 1}
+  score_adjust <- score_neg/score_pos
+}
+
+
+print("About to connect - Gobal/Remote")
+# Establish connection to Digital Ocean (remote) database
+remoteuserpassword <- "m3t1sz"
+conR <- dbConnect(RMariaDB::MariaDB(), dbname = 'metis', 'metis', password = remoteuserpassword, host = "178.62.8.181", port = 3306)
+print("Connected remote 1")
+# dbListTables(conR)
+
+
+# Retrieve RSS feed static data
+dbQuery <- dbSendQuery(conR, "SELECT * FROM rssSources")
+DEV.rssSources <- dbFetch(dbQuery)
+print("RSS Feeds static data retrieved")
+
+DEV.rss.Countries <- unique(dplyr::select(DEV.rssSources,Country))
+DEV.rss.Countries <- sort(DEV.rss.Countries[,1])
+DEV.rss.Regions <- c("AFRICA", "EU", "FAR EAST", "GULF", "N AMERICA")
+
+
+
+
+
