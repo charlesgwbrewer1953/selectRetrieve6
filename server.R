@@ -152,7 +152,7 @@ shinyServer(function(input, output, session) {
                         2,3,3,3,
                         3,3,3,1,
                         1,3,3,3,
-                        1,0,0,0)
+                        1,0,0,0) # Allocates value to groups of factors for (eg) colour mapping
 
      totValsSums1$group1 <- as.factor(totValsSumsGp)
     totValsSums1[totValsSums1$loughran_frame_negative, 2] <-  99 #totValsSums1[totValsSums1$loughran_frame_negative, 2] * -1
